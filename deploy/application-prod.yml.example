@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/department?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${DEPARTMENT_DB_USERNAME}
+    password: ${DEPARTMENT_DB_PASSWORD}
+
+server:
+  address: 127.0.0.1
+  port: 8080
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: true
+        same-site: lax
+
+department:
+  storage:
+    upload-directory: D:/ServiceDepartment/data/uploads
+

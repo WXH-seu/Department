@@ -53,7 +53,7 @@ class MemberAccountImportTests {
         assertThat(first.updated()).isZero();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM app_user", Integer.class)).isEqualTo(4);
         assertThat(jdbc.queryForList("SELECT role_code FROM user_role ORDER BY role_code", String.class))
-            .containsExactly("LEADER", "MEMBER", "MEMBER", "MINISTER");
+            .containsExactly("ADMIN", "LEADER", "MEMBER", "MEMBER");
         assertThat(jdbc.queryForObject("SELECT username FROM app_user WHERE display_name='骨干乙'", String.class))
             .isEqualTo("20000E01");
         String content = Files.readString(credentials);

@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberAccountImportService {
     private static final Pattern USERNAME = Pattern.compile("[a-zA-Z0-9_.-]{3,64}");
     private static final Map<String, String> ROLES = Map.of(
-        "负责人", "MINISTER", "核心骨干", "LEADER", "志愿者", "MEMBER");
+        "负责人", "ADMIN", "核心骨干", "LEADER", "志愿者", "MEMBER");
     private static final char[] PASSWORD_CHARS =
         "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%".toCharArray();
 
@@ -71,7 +71,8 @@ public class MemberAccountImportService {
             } else {
                 long adminRoles = jdbc.queryForObject(
                     "SELECT COUNT(*) FROM user_role WHERE user_id=? AND role_code='ADMIN'", Long.class, userId);
-                if (adminRoles > 0) throw new IllegalStateException("成员账号不能覆盖系统管理员: " + member.username());
+                if (adminRoles > 0 && !member.role().equals("ADMIN"))
+                    throw new IllegalStateException("成员导入不能自动降低管理员权限: " + member.username());
                 jdbc.update("UPDATE app_user SET display_name=?, enabled=TRUE, session_version=session_version+1 WHERE id=?",
                     member.displayName(), userId);
                 jdbc.update("DELETE FROM user_role WHERE user_id=?", userId);

@@ -1,8 +1,16 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
   application:
     name: department
   profiles:
     default: local
+  datasource:
+    url: ${DEPARTMENT_DB_URL:jdbc:mysql://127.0.0.1:3306/department?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DEPARTMENT_DB_USERNAME:department}
+    password: ${DEPARTMENT_DB_PASSWORD:}
 
 server:
   address: 127.0.0.1

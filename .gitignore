@@ -33,6 +33,7 @@ backup/
 
 # Database
 *.sql
+!backend/src/main/resources/db/migration/*.sql
 *.db
 *.sqlite
 

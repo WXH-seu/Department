@@ -1,0 +1,11 @@
+<service>
+  <id>DepartmentBackend</id>
+  <name>Department Backend</name>
+  <description>Department internal work management API</description>
+  <executable>D:\ServiceDepartment\java\bin\java.exe</executable>
+  <arguments>-jar D:\ServiceDepartment\backend.jar --spring.profiles.active=prod --spring.config.additional-location=file:D:/ServiceDepartment/config/</arguments>
+  <workingdirectory>D:\ServiceDepartment</workingdirectory>
+  <logpath>D:\ServiceDepartment\logs</logpath>
+  <log mode="roll-by-size"><sizeThreshold>10240</sizeThreshold><keepFiles>8</keepFiles></log>
+  <onfailure action="restart" delay="10 sec" />
+</service>

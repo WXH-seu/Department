@@ -1,6 +1,18 @@
 server {
     listen 80;
-    server_name _;
+    server_name department.example.edu;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name department.example.edu;
+    ssl_certificate D:/ServiceDepartment/certs/fullchain.pem;
+    ssl_certificate_key D:/ServiceDepartment/certs/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    client_max_body_size 11m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
 
     root D:/ServiceDepartment/frontend/dist;
     index index.html;

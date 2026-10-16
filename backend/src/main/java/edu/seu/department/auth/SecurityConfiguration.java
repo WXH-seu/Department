@@ -29,7 +29,8 @@ public class SecurityConfiguration {
             .addFilterBefore(new LoginAttemptFilter(attempts), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new AccountSessionFilter(users), AuthorizationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/health", "/api/v1/auth/csrf").permitAll()
+                .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico",
+                    "/api/v1/health", "/api/v1/auth/csrf").permitAll()
                 .requestMatchers("/api/v1/auth/**").authenticated()
                 .anyRequest().hasAnyRole("ADMIN","MINISTER","LEADER","MEMBER"))
             .requestCache(cache -> cache.disable())

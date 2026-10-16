@@ -22,6 +22,11 @@ class AuthIntegrationTests {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
     @Autowired PasswordEncoder encoder;
+
+    @Test
+    void loginPageAndBuiltAssetsArePublic() throws Exception {
+        mvc.perform(get("/")).andExpect(status().isOk());
+    }
     @Autowired ObjectMapper json;
     @Autowired edu.seu.department.auth.LoginAttempts attempts;
 

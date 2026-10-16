@@ -27,12 +27,14 @@ public class AccountSessionFilter extends OncePerRequestFilter {
         if (authentication != null && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken)) {
             boolean valid;
+            boolean mustChangePassword = false;
             try {
                 var current = users.loadUserByUsername(authentication.getName());
                 valid = current.isEnabled()
                     && new HashSet<>(current.getAuthorities()).equals(new HashSet<>(authentication.getAuthorities()));
                 if (authentication.getPrincipal() instanceof AccountPrincipal previous && current instanceof AccountPrincipal latest) {
                     valid = valid && previous.id() == latest.id() && previous.sessionVersion() == latest.sessionVersion();
+                    mustChangePassword = latest.mustChangePassword();
                 }
             } catch (UsernameNotFoundException deleted) {
                 valid = false;
@@ -40,6 +42,13 @@ public class AccountSessionFilter extends OncePerRequestFilter {
             if (!valid) {
                 new SecurityContextLogoutHandler().logout(request, response, authentication);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+            String path = request.getRequestURI();
+            if (mustChangePassword && path.startsWith("/api/v1/")
+                    && !path.equals("/api/v1/auth/me") && !path.equals("/api/v1/auth/password")
+                    && !path.equals("/api/v1/auth/logout") && !path.equals("/api/v1/auth/csrf")) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "请先修改临时密码");
                 return;
             }
         }

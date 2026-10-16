@@ -56,6 +56,7 @@ public class TaskController {
             statement.setLong(5,access.id(actor)); statement.setObject(6,input.dueDate()); return statement;
         },key);
         long id=key.getKey().longValue(); access.audit(actor,"TASK_CREATED",id);
+        jdbc.update("INSERT INTO task_status_event(task_id,actor,action,from_status,to_status,progress) VALUES (?,?,'CREATE',NULL,'TODO',0)",id,actor.getName());
         jdbc.update("INSERT INTO notification(user_id,task_id,message) VALUES (?,?,?)",input.assigneeId(),id,"你有新的任务："+input.title().trim());
         return Map.of("id",id);
     }
@@ -87,6 +88,7 @@ public class TaskController {
         if(jdbc.update("UPDATE work_task SET status=?,progress=?,version=version+1 WHERE id=? AND version=?",status,progress,id,input.version())==0)
             throw new ResponseStatusException(HttpStatus.CONFLICT,"任务已被更新，请刷新后重试");
         access.audit(actor,"TASK_" + input.action(),id);
+        jdbc.update("INSERT INTO task_status_event(task_id,actor,action,from_status,to_status,progress) VALUES (?,?,?,?,?,?)",id,actor.getName(),input.action(),task.status(),status,progress);
         long recipient=input.action().equals("SUBMIT") ? task.creatorId() : task.assigneeId();
         if(recipient != access.id(actor)) jdbc.update("INSERT INTO notification(user_id,task_id,message) VALUES (?,?,?)",recipient,id,"任务状态已更新："+task.title());
     }

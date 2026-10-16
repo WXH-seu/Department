@@ -25,7 +25,7 @@ public class AuthController {
         String hash=jdbc.queryForObject("SELECT password_hash FROM app_user WHERE username=? FOR UPDATE",String.class,actor.getName());
         if(!passwords.matches(input.currentPassword(),hash))
             throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"当前密码不正确");
-        jdbc.update("UPDATE app_user SET password_hash=?,session_version=session_version+1 WHERE username=?",passwords.encode(input.newPassword()),actor.getName());
+        jdbc.update("UPDATE app_user SET password_hash=?,must_change_password=FALSE,session_version=session_version+1 WHERE username=?",passwords.encode(input.newPassword()),actor.getName());
         jdbc.update("INSERT INTO audit_event(actor,action,target) VALUES (?,'PASSWORD_CHANGED',?)",actor.getName(),actor.getName());
     }
     @GetMapping("/csrf")
@@ -35,10 +35,12 @@ public class AuthController {
 
     @GetMapping("/me")
     public CurrentUser me(Authentication authentication) {
-        return new CurrentUser(authentication.getName(), authentication.getAuthorities().stream()
-            .map(authority -> authority.getAuthority()).toList());
+        boolean mustChange = authentication.getPrincipal() instanceof AccountPrincipal principal && principal.mustChangePassword();
+        String displayName = jdbc.queryForObject("SELECT display_name FROM app_user WHERE username=?",String.class,authentication.getName());
+        return new CurrentUser(authentication.getName(), displayName, authentication.getAuthorities().stream()
+            .map(authority -> authority.getAuthority()).toList(), mustChange);
     }
 
     public record CsrfResponse(String headerName, String token) {}
-    public record CurrentUser(String username, List<String> authorities) {}
+    public record CurrentUser(String username, String displayName, List<String> authorities, boolean mustChangePassword) {}
 }

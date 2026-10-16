@@ -48,6 +48,7 @@ Department/
 
 现状审查、后续开发顺序和验收条件见 [docs/development-plan.md](docs/development-plan.md)。
 后台管理控制台规划见 [docs/admin-console-plan.md](docs/admin-console-plan.md)。
+后台控制台操作和校园网访问见 [docs/admin-console-guide.md](docs/admin-console-guide.md)。
 Windows 上线、HTTPS、备份和恢复步骤见 [docs/deployment.md](docs/deployment.md)。
 
 ## 本地开发

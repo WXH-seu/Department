@@ -11,6 +11,8 @@ $mysqlRoot = Join-Path $InstallRoot 'mysql-runtime'
 $mysql = Join-Path $mysqlRoot 'bin\mysqld.exe'
 $data = Join-Path $InstallRoot 'mysql-data'
 $logs = Join-Path $InstallRoot 'logs'
+$campusIp = Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias 'WLAN' -ErrorAction SilentlyContinue |
+    Where-Object { $_.IPAddress -notlike '169.254.*' } | Select-Object -ExpandProperty IPAddress -First 1
 
 foreach ($required in @($app, $config, $mysql, $data)) {
     if (-not (Test-Path -LiteralPath $required)) { throw "本地部署文件不存在：$required" }
@@ -36,6 +38,7 @@ try {
     if ($health.status -eq 'ok') {
         if ($OpenBrowser) { Start-Process 'http://127.0.0.1:8080' }
         Write-Host '服务部系统已经在运行：http://127.0.0.1:8080'
+        if ($campusIp) { Write-Host "校园网访问地址：http://${campusIp}:8080" }
         return
     }
 } catch {}
@@ -67,6 +70,7 @@ for ($attempt = 0; $attempt -lt 60; $attempt++) {
         if ($health.status -eq 'ok') {
             if ($OpenBrowser) { Start-Process 'http://127.0.0.1:8080' }
             Write-Host '服务部系统启动成功：http://127.0.0.1:8080'
+            if ($campusIp) { Write-Host "校园网访问地址：http://${campusIp}:8080" }
             return
         }
     } catch {}

@@ -151,6 +151,20 @@ class AuthIntegrationTests {
         assertThat(encoder.matches("replacement-password",jdbc.queryForObject("SELECT password_hash FROM app_user WHERE username='member'",String.class))).isTrue();
     }
 
+    @Test
+    void temporaryPasswordAccountMustChangePasswordBeforeBusinessAccess() throws Exception {
+        jdbc.update("UPDATE app_user SET must_change_password=TRUE WHERE username='member'");
+        var session=login();
+        mvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.mustChangePassword").value(true));
+        mvc.perform(get("/api/v1/users").session(session)).andExpect(status().isForbidden());
+        var token=token(session);
+        mvc.perform(post("/api/v1/auth/password").session(session).header(token.header(),token.value())
+            .contentType("application/json").content("{\"currentPassword\":\"test-password-123\",\"newPassword\":\"replacement-password\"}"))
+            .andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT must_change_password FROM app_user WHERE username='member'",Boolean.class)).isFalse();
+    }
+
     private Token token(MockHttpSession session) throws Exception {
         var result = mvc.perform(get("/api/v1/auth/csrf").session(session))
             .andExpect(status().isOk()).andReturn();

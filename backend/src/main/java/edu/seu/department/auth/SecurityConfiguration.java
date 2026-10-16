@@ -29,7 +29,7 @@ public class SecurityConfiguration {
             .addFilterBefore(new LoginAttemptFilter(attempts), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new AccountSessionFilter(users), AuthorizationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico",
+                .requestMatchers("/", "/index.html", "/workspace", "/admin", "/admin/**", "/assets/**", "/favicon.ico",
                     "/api/v1/health", "/api/v1/auth/csrf").permitAll()
                 .requestMatchers("/api/v1/auth/**").authenticated()
                 .anyRequest().hasAnyRole("ADMIN","MINISTER","LEADER","MEMBER"))
@@ -43,6 +43,7 @@ public class SecurityConfiguration {
                 .loginProcessingUrl("/api/v1/auth/login")
                 .successHandler((request, response, authentication) -> {
                     attempts.succeeded(LoginAttempts.key(request.getParameter("username")));
+                    jdbc.update("UPDATE app_user SET last_login_at=CURRENT_TIMESTAMP WHERE username=?",authentication.getName());
                     jdbc.update("INSERT INTO audit_event(actor,action,target) VALUES (?,'LOGIN_SUCCEEDED',?)",authentication.getName(),authentication.getName());
                     response.setStatus(204);
                 })

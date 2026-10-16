@@ -30,6 +30,8 @@ uploads/
 logs/
 backup/
 *.log
+*初始凭据*.txt
+member-credentials*.txt
 
 # Database
 *.sql

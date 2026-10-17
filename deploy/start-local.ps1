@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$InstallRoot = (Join-Path $env:LOCALAPPDATA 'Department'),
     [switch]$OpenBrowser
 )
@@ -52,9 +52,26 @@ if ($env:JAVA_HOME) { $javaCandidates += (Join-Path $env:JAVA_HOME 'bin\java.exe
 $javaCandidates += 'F:\DevTools\Java\jdk-21.0.12.1+1\bin\java.exe'
 $javaCandidates += (Get-ChildItem 'C:\Program Files\Eclipse Adoptium' -Directory -Filter 'jdk-21*' -ErrorAction SilentlyContinue |
     Sort-Object Name -Descending | ForEach-Object { Join-Path $_.FullName 'bin\java.exe' })
-$java = $javaCandidates | Where-Object { Test-Path -LiteralPath $_ } | Where-Object {
-    (& $_ -version 2>&1 | Out-String) -match 'version "21'
-} | Select-Object -First 1
+function Test-Java21([string]$Candidate) {
+    if (-not (Test-Path -LiteralPath $Candidate)) { return $false }
+    $info = [System.Diagnostics.ProcessStartInfo]::new()
+    $info.FileName = $Candidate
+    $info.Arguments = '-version'
+    $info.UseShellExecute = $false
+    $info.CreateNoWindow = $true
+    $info.RedirectStandardOutput = $true
+    $info.RedirectStandardError = $true
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $info
+    try {
+        [void]$process.Start()
+        $output = $process.StandardOutput.ReadToEnd() + $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+        return $output -match 'version "21'
+    } catch { return $false }
+    finally { $process.Dispose() }
+}
+$java = $javaCandidates | Where-Object { Test-Java21 $_ } | Select-Object -First 1
 if (-not $java) { throw '未找到 Java 21，请先安装或设置 JAVA_HOME' }
 
 $configUrl = 'file:' + ($configDirectory -replace '\\', '/') + '/'

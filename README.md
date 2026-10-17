@@ -61,6 +61,8 @@ Windows 上线、HTTPS、备份和恢复步骤见 [docs/deployment.md](docs/depl
 
 本机打包部署会先构建前端，再执行后端打包；Maven 会把 `frontend/dist` 放入可执行 jar，由后端在同一个 8080 端口提供网页和 API。部署完成后可运行 `deploy/start-local.ps1` 和 `deploy/stop-local.ps1` 管理本地实例。
 
+Windows 本机可运行 `deploy/install-control-panel.ps1` 安装桌面图形控制台，通过按钮启动、关闭、重启服务器以及打开本机或校园网页面。
+
 启动后端前创建空的 MySQL 数据库 `department`，通过环境变量 `DEPARTMENT_DB_USERNAME`、`DEPARTMENT_DB_PASSWORD` 提供数据库凭据，可用 `DEPARTMENT_DB_URL` 覆盖连接地址。Flyway 在启动时创建并版本化管理表结构。测试使用独立的 H2 内存数据库，不需要本机 MySQL。
 
 第一版已提供数据库账号认证、登录工作台、人员与小组、任务闭环、通知、评论、附件和操作日志。系统不存在内置默认账号或密码；首次启动必须通过下述一次性初始化入口创建管理员。
